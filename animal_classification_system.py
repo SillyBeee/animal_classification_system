@@ -12,43 +12,37 @@ class AnimalClassificationSystem:
         self.database = []
 
     def add_fact(self, fact):
-        print(f"Adding fact: {fact}")  # 调试输出
-        self.database.append(fact)
-
-    def infer(self):
-        while True:
-            applicable_knowledge = self.find_applicable_knowledge()
-            if not applicable_knowledge:
-                break
-            for knowledge in applicable_knowledge:
-                self.apply_knowledge(knowledge)
+        if fact not in self.database:
+            self.database.append(fact)
 
     def find_applicable_knowledge(self):
         applicable_knowledge = []
         for knowledge in self.knowledge_base:
-            if all(fact in self.database for fact in knowledge["if"]):
+            if (all(fact in self.database for fact in knowledge["if"])
+                and knowledge["then"] not in self.database):
                 applicable_knowledge.append(knowledge)
-        # print(f"Applicable knowledge: {applicable_knowledge}")  # 调试输出
         return applicable_knowledge
 
     def apply_knowledge(self, knowledge):
-        if knowledge["then"] not in self.database:
-            # print(f"Applying knowledge: {knowledge}")  # 调试输出
-            self.database.append(knowledge["then"])
+        conclusion = knowledge["then"]
+        if conclusion not in self.database:
+            self.database.append(conclusion)
 
-    def classify(self):
-        self.infer()
-        result = [fact for fact in self.database if fact in ["老虎", "金钱豹", "斑马", "长颈鹿", "鸵鸟", "企鹅", "信天翁"]]
-        print(f"Classification result: {result}")  # 调试输出
-        return result
+    def infer(self):
+        while True:
+            applicable_rules = self.find_applicable_knowledge()
+            if not applicable_rules:
+                break
+            for rule in applicable_rules:
+                self.apply_knowledge(rule)
 
-# Example usage
+
 if __name__ == "__main__":
     system = AnimalClassificationSystem()
     while True:
-        fact = input("请输入一个特征 (输入 '结束' 以停止): ")
-        if fact == "结束":
+        fact = input("请输入一个特征(空行结束): ").strip()
+        if not fact:
             break
         system.add_fact(fact)
-    result = system.classify()
-    print("识别出的动物:", result)
+    system.infer()
+    print("识别结果:", system.database)
